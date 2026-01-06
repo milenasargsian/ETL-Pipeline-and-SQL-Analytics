@@ -67,10 +67,4 @@ All pipeline behavior is controlled via config.json:
 }
 
 
-(Binance has:
-
-~3000 total symbols
-
-~400–600 USDT pairs
-
-filter top 20 markets by 24h volume)
+(Binance has: ~3000 total symbols, ~400–600 USDT pairs, filter top 20 markets by 24h volume)
