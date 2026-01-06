@@ -56,7 +56,7 @@ All pipeline behavior is controlled via config.json:
   
   "top_n_markets": 20,                    // Selects top markets by 24h volume
   
-  "kline_interval": "5m",                 // 
+  "kline_interval": "5m",                 // 5m → 288 rows/day
   
   "start_date_utc": "2025-05-01",
   
@@ -67,4 +67,4 @@ All pipeline behavior is controlled via config.json:
 }
 
 
-(Binance has: ~3000 total symbols, ~400–600 USDT pairs, filter top 20 markets by 24h volume)
+(Binance has: ~3000 total symbols, ~400–600 USDT pairs, filter top 20 markets sort by quoteVolume (24h))
