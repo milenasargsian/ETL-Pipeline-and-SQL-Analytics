@@ -1,0 +1,9 @@
+{
+  "base_url": "https://api.binance.com",
+  "quote_asset": "USDT",
+  "top_n_markets": 20,
+  "kline_interval": "5m",
+  "start_date_utc": "2025-05-01",
+  "end_date_utc": null,
+  "trades_per_market": 5000
+}
