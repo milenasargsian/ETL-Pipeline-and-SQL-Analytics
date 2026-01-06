@@ -92,12 +92,12 @@ SELECT m.market_symbol,
        SUM(c.trade_count) AS trades
 FROM market_etl.candles c
 JOIN market_etl.markets m
-    ON m.market_id=c.market_id
+    ON m.market_id = c.market_id
 GROUP BY 1
 ORDER BY trades DESC
 LIMIT 10;
 
--- Q5: Latest bid/ask spread
+-- Latest bid/ask spread
 WITH latest_d AS (
     SELECT max(snapshot_date) AS snapshot_date
     FROM market_etl.tickers_24h
@@ -110,7 +110,7 @@ FROM market_etl.tickers_24h t
 JOIN latest_d
     ON t.snapshot_date = latest_d.snapshot_date
 JOIN market_etl.markets m
-    ON m.market_id=t.market_id
+    ON m.market_id = t.market_id
 ORDER BY spread_pct DESC NULLS LAST
 LIMIT 20;
 
@@ -121,7 +121,7 @@ SELECT m.market_symbol,
        SUM(tr.qty) AS base_qty
 FROM market_etl.trades tr
 JOIN market_etl.markets m
-    ON m.market_id=tr.market_id
+    ON m.market_id = tr.market_id
 -- WHERE m.market_symbol = 'BTCUSDT'
 GROUP BY 1, 2
 ORDER BY hour DESC
@@ -129,7 +129,10 @@ LIMIT 50;
 
 -- Buyer-maker ratio by market
 SELECT m.market_symbol,
-       AVG(CASE WHEN tr.is_buyer_maker THEN 1 ELSE 0 END)::numeric AS buyer_maker_ratio
+       AVG(CASE 
+                WHEN tr.is_buyer_maker THEN 1 
+                ELSE 0 
+           END)::numeric AS buyer_maker_ratio
 FROM market_etl.trades tr
 JOIN market_etl.markets m
     ON m.market_id=tr.market_id
@@ -143,7 +146,7 @@ WITH x AS (
          AVG(c.volume) OVER (ORDER BY c.open_time ROWS BETWEEN 29 PRECEDING AND CURRENT ROW) AS avg30
     FROM market_etl.candles c
     JOIN market_etl.markets m
-        ON m.market_id=c.market_id
+        ON m.market_id = c.market_id
     WHERE m.market_symbol = 'BTCUSDT'
 )
 
@@ -158,9 +161,9 @@ LIMIT 20;
 -- 7-day returns for latest day across markets
 WITH d AS (
     SELECT market_id,
-         open_time::date AS day,
-         close_price,
-         LAG(close_price, 7) OVER (PARTITION BY market_id ORDER BY open_time) AS close_7d_ago
+           open_time::date AS day,
+           close_price,
+           LAG(close_price, 7) OVER (PARTITION BY market_id ORDER BY open_time) AS close_7d_ago
     FROM market_etl.candles
 ),
 latest AS (
@@ -169,7 +172,7 @@ latest AS (
 )
 
 SELECT m.market_symbol,
-       (d.close_price / NULLIF(d.close_7d_ago,0) - 1) AS ret_7d
+       (d.close_price / NULLIF(d.close_7d_ago, 0) - 1) AS ret_7d
 FROM d
 JOIN latest
     ON d.day=latest.day
@@ -191,27 +194,26 @@ ORDER BY total_qty DESC;
 SELECT m.market_symbol,
        COUNT(t.trade_id) AS trade_count
 FROM market_etl.markets m
-LEFT JOIN market_etl.trades t ON t.market_id = m.market_id
+LEFT JOIN market_etl.trades t
+    ON t.market_id = m.market_id
 GROUP BY m.market_symbol
 HAVING COUNT(t.trade_id) = 0;
-
 
 -- Finds markets trading above average volume
 SELECT market_symbol,
        total_volume
 FROM (
-    SELECT
-        m.market_symbol,
-        SUM(c.volume) AS total_volume
+    SELECT m.market_symbol,
+           SUM(c.volume) AS total_volume
     FROM market_etl.candles c
-    JOIN market_etl.markets m ON m.market_id = c.market_id
+    JOIN market_etl.markets m
+        ON m.market_id = c.market_id
     GROUP BY m.market_symbol
 ) s
 WHERE total_volume > (
                         SELECT AVG(volume)
                         FROM market_etl.candles
                     );
-
 
 -- Classifies markets based on trade volume
 SELECT m.market_symbol,
@@ -225,8 +227,8 @@ FROM market_etl.markets m
 LEFT JOIN market_etl.trades t
     ON t.market_id = m.market_id
 GROUP BY m.market_symbol
-order by total_qty desc
-limit 20;
+ORDER BY total_qty DESC
+LIMIT 20;
 
 -- Compares current candle close price to previous one
 SELECT m.market_symbol,
@@ -240,10 +242,9 @@ ORDER BY price_change DESC NULLS LAST
 LIMIT 100;
 
 -- Running total of traded quantity per market
-SELECT
-    m.market_symbol,
-    t.trade_time,
-    SUM(t.qty) OVER (PARTITION BY t.market_id ORDER BY t.trade_time ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_volume
+SELECT m.market_symbol,
+       t.trade_time,
+       SUM(t.qty) OVER (PARTITION BY t.market_id ORDER BY t.trade_time ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_volume
 FROM market_etl.trades t
 JOIN market_etl.markets m
     ON m.market_id = t.market_id
@@ -260,10 +261,7 @@ FROM (
         m.market_symbol,
         c.open_time,
         c.close_price,
-        ROW_NUMBER() OVER (
-            PARTITION BY m.market_id
-            ORDER BY c.open_time DESC
-        ) AS rn
+        ROW_NUMBER() OVER (PARTITION BY m.market_id ORDER BY c.open_time DESC) AS rn
     FROM market_etl.candles c
     JOIN market_etl.markets m
         ON m.market_id = c.market_id
@@ -274,7 +272,8 @@ SELECT m.market_symbol,
        DATE_TRUNC('day', c.open_time) AS day,
        SUM(c.volume) AS daily_volume
 FROM market_etl.candles c
-JOIN market_etl.markets m ON m.market_id = c.market_id
+JOIN market_etl.markets m
+    ON m.market_id = c.market_id
 WHERE c.open_time >= now() - INTERVAL '7 days'
 GROUP BY 1, 2
 ORDER BY day DESC;
