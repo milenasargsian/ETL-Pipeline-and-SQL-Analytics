@@ -28,29 +28,49 @@ PostgreSQL (market_etl schema)
 Schemas & Tables
 
 All tables are stored under the market_etl schema.
+
 Dimension Tables
+
 assets — unique crypto assets (BTC, ETH, USDT, …)
+
 markets — trading pairs (BTC/USDT, ETH/USDT, …)
 
+
 Fact Tables
+
 candles — OHLCV data (partitioned by open_time)
+
 trades — aggregated trades (partitioned by trade_time)
+
 tickers_24h — daily 24h market snapshots
 
 Time-based partitions are created monthly for high-performance queries.
 
 All pipeline behavior is controlled via config.json:
+
 {
+
   "base_url": "https://api.binance.com",  // Binance Spot REST API
+  
   "quote_asset": "USDT",                  // Filters markets (USDT pairs only)
+  
   "top_n_markets": 20,                    // Selects top markets by 24h volume
+  
   "kline_interval": "5m",                 // 
+  
   "start_date_utc": "2025-05-01",
+  
   "end_date_utc": null, 
+  
   "trades_per_market": 5000                // Trade volume cap per market
+
 }
 
+
 (Binance has:
+
 ~3000 total symbols
+
 ~400–600 USDT pairs
+
 filter top 20 markets by 24h volume)
