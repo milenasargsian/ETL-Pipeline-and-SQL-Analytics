@@ -4,8 +4,8 @@
 
 This project implements a production-style ETL pipeline that ingests cryptocurrency market data from the Binance Spot API, cleans and normalizes it, and loads it into a partitioned PostgreSQL data warehouse optimized for analytical queries.
 
-### Data Model
-#### Schemas & Tables
+## Data Model
+### Schemas & Tables
 
 All tables are stored under the market_etl schema.
 
@@ -38,7 +38,6 @@ All pipeline behavior is controlled via config.json:
 }
 ```
 
-
 (Binance has: ~3000 total symbols, ~400–600 USDT pairs, filter top 20 markets sort by quoteVolume (24h))
 
 ### Order to run the project 
@@ -53,7 +52,7 @@ All pipeline behavior is controlled via config.json:
 ### The project includes:
 
 * 2 reusable SQL views
-* 10 analytical SQL queries demonstrating:
+* Analytical SQL queries demonstrating:
     * JOINs (INNER, LEFT)
     * Aggregations (COUNT, SUM, AVG)
     * Window functions (ROW_NUMBER, LAG, running totals)
